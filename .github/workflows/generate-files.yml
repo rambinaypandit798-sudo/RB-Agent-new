@@ -1,0 +1,34 @@
+name: Generate missing files
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'setup.sh'
+      - '.github/workflows/generate-files.yml'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make script executable
+        run: chmod +x setup.sh
+
+      - name: Run setup script
+        run: bash setup.sh
+
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "Auto-generate missing source files"
+          git push
