@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'RB Agent',
   webDir: '.output/public',
   server: {
-    url: 'https://YOUR-VERCEL-URL.vercel.app',  // ⚠️ apna URL daalo
+    url: 'https://rb-agent-new.vercel.app',  // आपका लाइव Vercel यूआरएल[span_1](start_span)[span_1](end_span)
     cleartext: false,
     androidScheme: 'https',
   },
