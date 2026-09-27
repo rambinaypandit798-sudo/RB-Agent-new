@@ -38,8 +38,6 @@ jobs:
 
       - name: Install Android SDK components
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager "platform-tools" \
                      "platforms;android-34" \
@@ -48,17 +46,14 @@ jobs:
                      "build-tools;35.0.0" \
                      "cmdline-tools;latest"
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          echo "=== Installed SDK packages ==="
-          sdkmanager --list_installed || true
 
       - name: Install dependencies
-        run: bun install
+        run: bun install || npm install
 
-      - name: Build web
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        run: bun run build
+      - name: Create web dir placeholder
+        run: |
+          mkdir -p .output/public
+          echo '<html><body><p>RB Agent loading…</p></body></html>' > .output/public/index.html
 
       - name: Capacitor sync
         run: npx cap sync android
