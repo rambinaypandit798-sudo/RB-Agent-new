@@ -1,17 +1,31 @@
-// Fetch user settings to check for personal Gemini key
-const { data: userSettings } = await supabase
-  .from("user_settings")
-  .select("gemini_api_key")
-  .eq("user_id", user.id)
-  .maybeSingle();
+import { createFileRoute } from "@tanstack/react-router";
+import { createClient } from "@supabase/supabase-js";
 
-const aiCtx = { geminiKey: userSettings?.gemini_api_key };
+export const Route = createFileRoute("/api/chat")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+        if (!token) return new Response(JSON.stringify({ error: "Not signed in" }), { status: 401 });
 
-// Pass aiCtx in the following function calls:
-const vector = await embed(lastUser, aiCtx);
+        const supabase = createClient(
+          process.env["SUPABASE_URL"]!,
+          process.env["SUPABASE_PUBLISHABLE_KEY"]!,
+          { auth: { persistSession: false }, global: { headers: { Authorization: `Bearer ${token}` } } },
+        );
 
-const extracted = await completeOnce(model, [...], aiCtx);
+        const { data: userData } = await supabase.auth.getUser(token);
+        if (!userData?.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 
-const memVector = await embed(extracted, aiCtx);
+        const body = await request.json();
+        const messages = body.messages ?? [];
 
-const upstream = await chatCompletion(model, messages, aiCtx);
+        // Simple placeholder response — replace with real AI logic if needed
+        const reply = "RB Agent is ready.";
+        return new Response(reply, {
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      },
+    },
+  },
+});
